@@ -188,7 +188,7 @@ class UserController extends Controller
                 }
             }
         }
-        
+
         return response()->json([
             'status' =>  'success',
             'message' => 'The times available to the expert',

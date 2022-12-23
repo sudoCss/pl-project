@@ -9,6 +9,7 @@ use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\FavouriteController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\WalletController;
 
 
 
@@ -43,7 +44,7 @@ Route::group(['middleware' => ['auth:api']], function(){
     Route::post('/admins/charge', [UserController::class, 'charge']);
     Route::prefix('/appointments')->controller(AppointmentController::class)->group(function(){
         Route::get('/', 'index');
-        Route::get('//schedule', 'schedule');
+        Route::get('/schedule', 'schedule');
         Route::post('/{expert}', 'store');
         Route::delete('/{appointment}', 'destroy');
 });
@@ -75,6 +76,10 @@ Route::group(['middleware' => ['auth:api']], function(){
         Route::get('/', 'index');
         Route::post('/', 'search');
         Route::get('/{speciality}', 'show');
+    });
+
+    Route::prefix('/wallet')->controller(WalletController::class)->group(function(){
+        Route::get('/', 'index');
     });
 
 });
