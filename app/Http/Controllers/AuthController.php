@@ -19,45 +19,44 @@ class AuthController extends Controller
         $validateData = $request->validate([
             'firstName' => 'required',
             'lastName' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users',
             'password' => 'required',
             'confirm' => 'required|same:password',
             'role_id' => 'required',
+            'number' => 'required',
+            'address' => 'required',
+            // 'image' => 'image|mimes:jpeg,bmp,png,jpg|max:3000',
         ]);
+
+        $path = null;
+
+        if($request->hasFile('image'))
+            $path = '/storage/'.$request->file('image')->store('images',['disk' => 'public']);
 
         $wallet = new Wallet();
         $wallet->quantity = 0;
         $wallet->save();
-
 
         $user = new User();
         $user->firstName = $request->firstName;
         $user->lastName = $request->lastName;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
+        $user->number = $request->number;
+        $user->address = $request->address;
+        $user->image = $path;
         $user->role_id = $request->role_id;
         $user->wallet_id = $wallet->id;
 
         if ($request->role_id == Role::where('name', 'Expert')->first()->id)
         {
             $validateData = $request->validate([
-                // 'image' => 'required|image|mimes:jpeg,bmp,png,jpg|max:3000',
-                'number' => 'required',
-                'address' => 'required',
                 "days" => 'required|array',
                 'days.*' => 'required_array_keys:day_id,startTime,endTime',
                 'specialities' => 'required|array',
                 'specialities.*' => "required_array_keys:speciality_id,details"
             ]);
 
-            $path = null;
-
-            if($request->hasFile('image'))
-                $path = '/storage/'.$request->file('image')->store('images',['disk' => 'public']);
-
-            $user->number = $request->number;
-            $user->address = $request->address;
-            $user->image = $path;
             $user->save();
 
             foreach($request->days as $day)
@@ -85,7 +84,7 @@ class AuthController extends Controller
                 'message' => 'Registered successfully',
                 'data' => ['Expert' => $user, 'token'=> $user->createToken('auth_token')->accessToken ]
 
-            ], Response::HTTP_CREATED);
+            ], Response::HTTP_OK);
         }
 
         if ($request->role_id == Role::where('name', 'Normal')->first()->id) {
@@ -97,7 +96,7 @@ class AuthController extends Controller
                 'message' => 'Registered successfully',
                 'data' => ['Normal' => $user, 'token'=> $user->createToken('auth_token')->accessToken]
 
-            ], Response::HTTP_CREATED);
+            ], Response::HTTP_OK);
         }
 
         return response()->json([
@@ -130,7 +129,7 @@ class AuthController extends Controller
             ], Response::HTTP_OK);
         } else {
             return response()->json([
-                'status' => 0,
+                'status' => 'failed',
                 'message' => 'Invalid credentials',
                 'data' => (object) []
             ], Response::HTTP_BAD_REQUEST);

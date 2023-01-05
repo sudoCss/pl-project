@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Wallet;
 use App\Http\Requests\StoreWalletRequest;
 use App\Http\Requests\UpdateWalletRequest;
+use Symfony\Component\HttpFoundation\Response;
 
 class WalletController extends Controller
 {
@@ -15,7 +16,14 @@ class WalletController extends Controller
      */
     public function index()
     {
-        //
+        $wallet = Wallet::find(auth()->id());
+        return response()->json([
+            'status' =>  'success',
+            'message' => 'Get wallet quantity successfully',
+            'data' => [
+                'quantitiy' => $wallet->quantity
+            ]
+        ], Response::HTTP_OK);
     }
 
     /**

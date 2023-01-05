@@ -36,7 +36,7 @@ class FavouriteController extends Controller
             'status' =>  'failed',
             'message' => 'No favourites yet',
             'data' =>  (object) []
-        ], Response::HTTP_OK);
+        ], Response::HTTP_BAD_REQUEST);
 
 
     }
@@ -53,7 +53,7 @@ class FavouriteController extends Controller
                 'data' => [
                     'Favourites' => (object) []
                 ]
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
         }
         // foreach($myFavourites as $favourite)
         // {
@@ -97,7 +97,7 @@ class FavouriteController extends Controller
                 'data' => [
                     'Favourites' => (object) []
                 ]
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $favourite = Favourite::where('id', $id)->first();

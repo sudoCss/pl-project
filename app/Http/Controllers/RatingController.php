@@ -20,8 +20,6 @@ class RatingController extends Controller
     public function index($id)
     {
         $rated = User::find($id);
-        $ratings = $rated->rated();
-        return $ratings;
         $ratings = Rating::where('rated', $id)->join('users','users.id','=','ratings.rater')->select('users.id', 'firstName', 'lastName', 'image', 'stars')->get();
 
         return response()->json([
@@ -35,13 +33,14 @@ class RatingController extends Controller
 
     public function store(StoreRatingRequest $request, $id)
     {
+
         if(!User::where('id', $id)->exists())
         {
             return response()->json([
                 'status' =>  'failed',
                 'message' => 'Expert not found',
                 'data' => (object) []
-            ], Response::HTTP_NOT_FOUND);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $validateData = $request->validate([
@@ -71,7 +70,7 @@ class RatingController extends Controller
                 'status' =>  'failed',
                 'message' => 'Rating not found',
                 'data' => (object) []
-            ], Response::HTTP_NOT_FOUND);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $validateData = $request->validate([
@@ -99,7 +98,7 @@ class RatingController extends Controller
                 'status' =>  'failed',
                 'message' => 'Rating not found',
                 'data' => (object) []
-            ], Response::HTTP_NOT_FOUND);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
 
@@ -122,7 +121,7 @@ class RatingController extends Controller
                 'status' =>  'failed',
                 'message' => 'Expert not found',
                 'data' => (object) []
-            ], Response::HTTP_NOT_FOUND);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $avg = Rating::where('rated', $id)->avg('stars');
@@ -136,6 +135,9 @@ class RatingController extends Controller
         ], Response::HTTP_OK);
 
     }
+
+
+
 
     /**
      * Store a newly created resource in storage.

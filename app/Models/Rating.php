@@ -29,4 +29,6 @@ class Rating extends Model
         return $this->belongsTo(User::class, 'rater');
     }
 
+
+
 }

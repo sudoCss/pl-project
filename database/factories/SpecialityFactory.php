@@ -17,7 +17,7 @@ class SpecialityFactory extends Factory
     public function definition()
     {
         return [
-            'name' => fake()->unique()->randomElement($array=array('Medical','Professional','Family', 'Business', 'Psychological')),
+            // 'name' => fake()->unique()->randomElement($array=array('Medical','Professional','Family', 'Business', 'Psychological')),
         ];
     }
 }

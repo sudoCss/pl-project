@@ -52,7 +52,7 @@ class SpecialityController extends Controller
                 'status' =>  'failed',
                 'message' => 'Not found',
                 'data' =>  (object) []
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -88,7 +88,7 @@ class SpecialityController extends Controller
                 'status' =>  'failed',
                 'message' => 'Not found',
                 'data' => (object) []
-            ], Response::HTTP_NOT_FOUND);
+            ], Response::HTTP_BAD_REQUEST);
 
 
     }

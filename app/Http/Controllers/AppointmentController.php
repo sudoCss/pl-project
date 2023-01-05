@@ -38,7 +38,7 @@ class AppointmentController extends Controller
             'status' =>  'failed',
             'message' => 'No Appointments yet',
             'data' =>  (object) []
-        ], Response::HTTP_OK);
+        ], Response::HTTP_BAD_REQUEST);
 
 
     }
@@ -64,14 +64,14 @@ class AppointmentController extends Controller
                 'status' =>  'failed',
                 'message' => 'schedule is Empty',
                 'data' =>  (object) []
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         return response()->json([
             'status' =>  'failed',
             'message' => 'You are not expert',
             'data' => (object) []
-        ], Response::HTTP_OK);
+        ], Response::HTTP_BAD_REQUEST);
     }
 
     public function store(Request $request, $id)
@@ -82,7 +82,7 @@ class AppointmentController extends Controller
                 'status' =>  'failed',
                 'message' => "You can't have appointment with yourself",
                 'data' => (object) []
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $validateData = $request->validate([
@@ -102,7 +102,7 @@ class AppointmentController extends Controller
                 'status' =>  'failed',
                 'message' => "You don't have enough money",
                 'data' => (object) []
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $appointment = new Appointment();
@@ -144,7 +144,7 @@ class AppointmentController extends Controller
                 'status' =>  'failed',
                 'message' => "Not found",
                 'data' => (object) []
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         if(!Appointment::where(['id' => $id, 'user_id' => auth()->user()->id])->exists())
@@ -153,7 +153,7 @@ class AppointmentController extends Controller
                 'status' =>  'failed',
                 'message' => "You don't have permission to delete this appointment",
                 'data' => (object) []
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $appointment = Appointment::find($id);

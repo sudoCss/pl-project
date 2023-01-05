@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
     {
 
          \App\Models\Day::factory(7)->create();
-         \App\Models\Speciality::factory(5)->create();
+        $this->call(SpecialitySeeder::class);
+        //  \App\Models\Speciality::factory(5)->create();
           \App\Models\Role::factory(3)->create();
           \App\Models\User::factory(20)->create();
           \App\Models\Experience::factory(50)->create();

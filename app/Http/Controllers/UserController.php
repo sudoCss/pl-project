@@ -69,7 +69,7 @@ class UserController extends Controller
                 'status' =>  'failed',
                 'message' => 'Expert not found',
                 'data' =>  (object) []
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -95,7 +95,7 @@ class UserController extends Controller
                 'status' =>  'failed',
                 'message' => 'Not found',
                 'data' => (object) []
-            ], Response::HTTP_OK);
+            ], Response::HTTP_BAD_REQUEST);
 
     }
 
@@ -107,7 +107,7 @@ class UserController extends Controller
                 'status' =>  'failed',
                 'message' => 'You are not Admin',
                 'data' => (object) []
-            ], Response::HTTP_NOT_FOUND);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $validateData = $request->validate([
@@ -121,7 +121,7 @@ class UserController extends Controller
                 'status' =>  'failed',
                 'message' => 'User Not found',
                 'data' => (object) []
-            ], Response::HTTP_NOT_FOUND);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         if(User::where(['email' => $request->email, 'role_id' => Role::where('name', 'Admin')->first()->id])->exists())
@@ -130,7 +130,7 @@ class UserController extends Controller
                 'status' =>  'failed',
                 'message' => 'Admin have no permission',
                 'data' => (object) []
-            ], Response::HTTP_NOT_FOUND);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
 
@@ -156,7 +156,7 @@ class UserController extends Controller
             $hours = array();
             for($i = 0; $i < 24; $i++)
             {
-                $hours[$i] = $i >= $day->startTime && $i < $day->endTime;
+                $hours[$i] = ($i >= $day->startTime) && ($i < $day->endTime);
             }
             $expertSchedule = Appointment::where(['expert'=> $id, 'day_id' => $day->day_id])
                 ->orderBy('startTime', 'ASC')
@@ -182,17 +182,70 @@ class UserController extends Controller
                                 'start' => $i,
                                 'end' => $j,
                             ];
+                            $i = $j;
                             break;
                         }
                     }
                 }
             }
         }
-        
+
         return response()->json([
             'status' =>  'success',
             'message' => 'The times available to the expert',
             'data' => ['times' => $results]
+        ], Response::HTTP_OK);
+    }
+
+    public function update(Request $request)
+    {
+        $validateData = $request->validate([
+            'firstName' => 'required',
+            'lastName' => 'required',
+            'email' => 'required|email|unique:users,id,'.auth()->user()->id,
+            'number' => 'required',
+            'address' => 'required',
+            // 'image' => 'image|mimes:jpeg,bmp,png,jpg|max:3000',
+        ]);
+
+        $path = auth()->user()->image;
+
+        if($request->hasFile('image'))
+            $path = '/storage/'.$request->file('image')->store('images',['disk' => 'public']);
+
+        $user = auth()->user();
+        $user->firstName = $request->firstName;
+        $user->lastName = $request->lastName;
+        $user->email = $request->email;
+        $user->number = $request->number;
+        $user->address = $request->address;
+        $user->image = $path;
+        $user->save();
+
+        return response()->json([
+            'status' =>  'success',
+            'message' => 'Updated successfully',
+            'data' => ['User' => $user]
+
+        ], Response::HTTP_OK);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $validateData = $request->validate([
+            'password' => 'required',
+            'confirm' => 'required|same:password',
+        ]);
+
+        $user = auth()->user();
+        $user->password = bcrypt($request->password);
+        $user->save();
+
+        return response()->json([
+            'status' =>  'success',
+            'message' => 'Updated successfully',
+            'data' => ['User' => $user]
+
         ], Response::HTTP_OK);
     }
 
@@ -222,10 +275,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+
 
     /**
      * Remove the specified resource from storage.
