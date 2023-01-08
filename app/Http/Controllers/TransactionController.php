@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class TransactionController extends Controller
 {
@@ -15,7 +19,38 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        //
+        $transactions = Transaction::where('user_id', auth()->user()->id)
+        ->select('transactions.*')
+        ->addSelect([
+            'firstName' =>
+            User::query()
+            ->select(DB::raw('firstName'))
+            ->whereColumn('users.id', 'transactions.expert')
+        ])
+        ->addSelect([
+            'lastName' =>
+            User::query()
+            ->select(DB::raw('lastName'))
+            ->whereColumn('users.id', 'transactions.expert')
+        ])
+        ->get();
+
+        if(count($transactions) > 0)
+        {
+            return response()->json([
+                'status' =>  'success',
+                'message' => 'Get all transactions successfully',
+                'data' => [
+                    'Transactions' => $transactions
+                ]
+            ], Response::HTTP_OK);
+        }
+
+        return response()->json([
+            'status' =>  'failed',
+            'message' => 'No Transactions yet',
+            'data' =>  (object) []
+        ], Response::HTTP_BAD_REQUEST);
     }
 
     /**

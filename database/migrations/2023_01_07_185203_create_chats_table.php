@@ -13,15 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('ratings', function (Blueprint $table) {
+        Schema::create('chats', function (Blueprint $table) {
             $table->id();
-            $table->float('stars', 3, 2);
-
-            $table->unsignedBigInteger('rated');
-            $table->foreign('rated')->references('id')->on('users');
-            $table->unsignedBigInteger('rater');
-            $table->foreign('rater')->references('id')->on('users');
-
+            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+            $table->string('name')->nullable();
+            $table->boolean('is_private')->default(true);
             $table->timestamps();
         });
     }
@@ -33,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ratings');
+        Schema::dropIfExists('chats');
     }
 };

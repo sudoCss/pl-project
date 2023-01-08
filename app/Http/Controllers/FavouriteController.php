@@ -19,7 +19,10 @@ class FavouriteController extends Controller
     public function index()
     {
         $id = auth()->user()->id;
-        $myFavourites = Favourite::where('user_id', $id)->join('users','users.id','=','favourites.expert')->select('users.id', 'firstName', 'lastName', 'image')->get();  //->join('users','users.id','=','favourites.expert')
+        $myFavourites = Favourite::where('user_id', $id)
+                                    ->join('users','users.id','=','favourites.expert')
+                                    ->select('users.id', 'firstName', 'lastName', 'image')
+                                    ->get();
 
         if(count($myFavourites) > 0)
         {
@@ -89,7 +92,7 @@ class FavouriteController extends Controller
     {
         $user_id = auth()->user()->id;
 
-        if(!Favourite::where('id', $id)->exists())
+        if(!Favourite::where(['user_id' => $user_id, 'expert' => $id])->exists())
         {
             return response()->json([
                 'status' =>  'failed',
@@ -100,7 +103,7 @@ class FavouriteController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $favourite = Favourite::where('id', $id)->first();
+        $favourite = Favourite::where(['user_id' => $user_id, 'expert' => $id])->first();
         $favourite->delete();
 
         return response()->json([

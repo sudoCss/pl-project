@@ -18,10 +18,21 @@ class ExperienceFactory extends Factory
      */
     public function definition()
     {
+        // $expertId = User::where('role_id',  Role::where('name', 'Expert')->first()->id)->get()->random()->id;
+        // $expertAndSpeciality = fake()->unique()->regexify("/^$expertId-[1-6]{1}");
+        // $specialityId = explode('-', $expertAndSpeciality)[1];
+
+        $expertIds =  User::select('id')->where('role_id',  Role::where('name', 'Expert')->first()->id)->get();
+        $expertId = fake()->unique()->randomElement($expertIds);
+        $specialityId = Speciality::all()->random()->id;
+
+        // $expertAndSpeciality = fake()->unique()->regexify("/^$specialityId-[1-20]{1}");
+
+
         return [
             'details' => fake()->text($maxNbChars = 100),
-            'speciality_id' => Speciality::all()->random()->id,
-            'user_id' => User::where('role_id',  Role::where('name', 'Expert')->first()->id)->get()->random()->id,  //all()->random()->id
+            'speciality_id' => $specialityId, //Speciality::all()->random()->id,
+            'user_id' => $expertId, //User::where('role_id',  Role::where('name', 'Expert')->first()->id)->get()->random()->id,  //all()->random()->id
         ];
     }
 }

@@ -19,6 +19,8 @@ class User extends Authenticatable
      */
 
     protected $table = 'users';
+    protected $guarded = ['id'];
+
 
     // protected $primaryKey = 'id';
 
@@ -92,5 +94,10 @@ class User extends Authenticatable
     public function favourites()
     {
         return $this->hasMany(Favourite::class);
+    }
+
+    public function chats() : HasMany
+    {
+        return $this->hasMany(Chat::class, 'created_by');
     }
 }

@@ -10,6 +10,9 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\FavouriteController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ChatMessageController;
 
 
 
@@ -84,9 +87,18 @@ Route::group(['middleware' => ['auth:api']], function(){
     });
 
     Route::prefix('/profile')->controller(UserController::class)->group(function(){
+        Route::get('/', 'profile');
         Route::post('/', 'update');
+        Route::post('/expert', 'updateExpert');
         Route::post('/password', 'changePassword');
     });
+
+    Route::prefix('/transactions')->controller(TransactionController::class)->group(function(){
+        Route::get('/', 'index');
+    });
+
+    Route::apiResource('chat', ChatController::class)->only(['index', 'store', 'show']);
+    Route::apiResource('chatMessage', ChatMessageController::class)->only(['index', 'store']);
 
 });
 

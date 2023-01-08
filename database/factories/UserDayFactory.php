@@ -28,7 +28,6 @@ class UserDayFactory extends Factory
         $userId =  User::where('role_id', Role::where('name', 'Expert')->first()->id)->get()->random()->id;
 
         $userAndDay = fake()->unique()->regexify("/^$userId-[1-7]{1}");
-        // $dayId = Day::all()->random()->id;
         $dayId = explode('-', $userAndDay)[1];
 
         $startTime = fake()->numberBetween($min = 0, $max = 23);

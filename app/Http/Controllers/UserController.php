@@ -12,6 +12,8 @@ use App\Models\Wallet;
 use App\Models\Rating;
 use App\Models\UserDay;
 use App\Models\Appointment;
+use App\Models\Experience;
+use App\Models\Speciality;
 
 class UserController extends Controller
 {
@@ -24,6 +26,7 @@ class UserController extends Controller
     {
         $experts =  User::query()->where('role_id', Role::where('name', 'Expert')->first()->id)
         ->select('users.*')
+        // ->with('specialities')
         ->addSelect([
             'average_rate' =>
             Rating::query()
@@ -33,10 +36,46 @@ class UserController extends Controller
         ->addSelect([
             'favourited' =>
             Favourite::query()
-            ->select(DB::raw("1"))->where('favourites.user_id', auth()->id())
+            ->select(DB::raw("1"))
+            ->where('favourites.user_id', auth()->id())
             ->whereColumn('users.id', 'favourites.expert')
         ])
+        ->addSelect([
+            'favourite_id' =>
+            Favourite::query()
+            ->select(DB::raw('favourites.id'))
+            ->where('favourites.user_id', auth()->id())
+            ->whereColumn('users.id', 'favourites.expert')
+        ])
+        ->addSelect([
+            'speciality_id' =>
+            Experience::query()
+            ->select(DB::raw('speciality_id'))
+            ->whereColumn('users.id', 'experiences.user_id')
+        ])
+        ->addSelect([
+            'details' =>
+            Experience::query()
+            ->select(DB::raw('details'))
+            ->whereColumn('users.id', 'experiences.user_id')
+        ])
         ->get();
+
+        // ->addSelect([
+        //     'speciality' =>
+        //     Speciality::query()
+        //     ->select(DB::raw('specialities.name'))
+        //     // ->with('specialities')
+        //     ->first()
+            // ->where('specialities.id', 'experiences.speciality_id')
+            // ->where('users.id', 'experiences.user_id')
+        // ])
+
+        //     'speciality Name' =>
+        //     Experience::query()
+        //     ->select(DB::raw('speciality.name'))
+        //     ->where('specialities.id', Experience::query()->select(DB::raw('speciality_id'))->whereColumn('users.id', 'experiences.user_id'))
+        // ])
 
         return response()->json([
             'status' =>  'success',
@@ -45,6 +84,8 @@ class UserController extends Controller
                 'experts' => $experts
             ]
         ], Response::HTTP_OK);
+
+
     }
 
     public function search(Request $request)
@@ -53,7 +94,40 @@ class UserController extends Controller
 
         if(User::where(['role_id' =>  Role::where('name', 'Expert')->first()->id])->where('firstName', 'LIKE', "%{$name}%")->orwhere('lastName', 'LIKE', "%{$name}%")->exists())
         {
-            $experts = User::where('firstName', 'LIKE', "%{$name}%")->orwhere('lastName', 'LIKE', "%{$name}%")->get();
+            $experts = User::where('firstName', 'LIKE', "%{$name}%")->orwhere('lastName', 'LIKE', "%{$name}%")
+            ->addSelect([
+                'average_rate' =>
+                Rating::query()
+                ->select(DB::raw('AVG(ratings.stars)'))
+                ->whereColumn('users.id', 'ratings.rated')
+            ])
+            ->addSelect([
+                'favourited' =>
+                Favourite::query()
+                ->select(DB::raw("1"))
+                ->where('favourites.user_id', auth()->id())
+                ->whereColumn('users.id', 'favourites.expert')
+            ])
+            ->addSelect([
+                'favourite_id' =>
+                Favourite::query()
+                ->select(DB::raw('favourites.id'))
+                ->where('favourites.user_id', auth()->id())
+                ->whereColumn('users.id', 'favourites.expert')
+            ])
+            ->addSelect([
+                'speciality_id' =>
+                Experience::query()
+                ->select(DB::raw('speciality_id'))
+                ->whereColumn('users.id', 'experiences.user_id')
+            ])
+            ->addSelect([
+                'details' =>
+                Experience::query()
+                ->select(DB::raw('details'))
+                ->whereColumn('users.id', 'experiences.user_id')
+            ])
+            ->get();
 
             return response()->json([
                 'status' =>  'success',
@@ -245,6 +319,67 @@ class UserController extends Controller
             'status' =>  'success',
             'message' => 'Updated successfully',
             'data' => ['User' => $user]
+
+        ], Response::HTTP_OK);
+    }
+
+    public function profile()
+    {
+        $userData = auth()->user();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User data',
+            'data' => ['UserData' => $userData]
+        ]);
+    }
+
+    public function updateExpert(Request $request)
+    {
+        if(auth()->user()->role_id != Role::where('name', 'Expert')->first()->id)
+        {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'You are not expert',
+                'data' => (object) []
+            ]);
+
+        }
+
+        $validateData = $request->validate([
+            "days" => 'required|array',
+            'days.*' => 'required_array_keys:day_id,startTime,endTime',
+            'specialities' => 'required|array',
+            'specialities.*' => "required_array_keys:speciality_id,details"
+        ]);
+
+        UserDay::where('user_id', auth()->id())->delete();
+        foreach($request->days as $day)
+        {
+            $user_day= new UserDay();
+            $user_day->user_id = auth()->id();
+            $user_day->day_id = $day['day_id'];
+            $user_day->startTime = $day['startTime'];
+            $user_day->endTime = $day['endTime'];
+            $user_day->save();
+        }
+
+        Experience::where('user_id', auth()->id())->delete();
+        foreach($request->specialities as $speciality)
+        {
+            $experience = new Experience();
+            $experience->user_id = auth()->id();
+            $experience->speciality_id = $speciality['speciality_id'];
+            $experience->details = $speciality['details'];
+            $experience->save();
+        }
+
+        $user = auth()->user();
+
+        return response()->json([
+            'status' =>  'success',
+            'message' => 'Registered successfully',
+            'data' => ['Expert' => $user ]
 
         ], Response::HTTP_OK);
     }

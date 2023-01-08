@@ -23,6 +23,6 @@ class UserDaySeeder extends Seeder
                 'startTime' => 8,
                 'endTime' => 1
             ]
-        ]);
+        ]); 
     }
 }

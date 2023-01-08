@@ -25,7 +25,7 @@ class AuthController extends Controller
             'role_id' => 'required',
             'number' => 'required',
             'address' => 'required',
-            // 'image' => 'image|mimes:jpeg,bmp,png,jpg|max:3000',
+            'image' => 'image|mimes:jpeg,bmp,png,jpg|max:3000',
         ]);
 
         $path = null;

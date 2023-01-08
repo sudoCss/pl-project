@@ -44,9 +44,10 @@ class RatingController extends Controller
         }
 
         $validateData = $request->validate([
-            'stars' => 'required|integer|min:1|max:5'
+            'stars' => 'required|decimal|min:1|max:5'
         ]);
 
+        Rating::where(['rater' => auth()->id(), 'rated' => $id])->delete();
         $rating = new Rating();
         $rating->stars = $request->stars;
         $rating->rater = auth()->user()->id;
